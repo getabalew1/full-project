@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Eye, EyeOff, User, Lock, Shield, UserCheck } from "lucide-react";
+import { Eye, EyeOff, User, Lock, Shield, UserCheck, KeyRound } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
@@ -47,11 +47,13 @@ export function LoginForm() {
     try {
       if (!validateUsername(formData.username)) {
         toast.error("Username must start with 'dbu' followed by 8 digits (e.g., dbu10304058)");
+        setIsLoading(false);
         return;
       }
 
       if (!validatePassword(formData.password)) {
         toast.error("Password must be at least 8 characters with uppercase, lowercase, digit, and symbol");
+        setIsLoading(false);
         return;
       }
 
@@ -64,7 +66,6 @@ export function LoginForm() {
       }
     } catch (error) {
       toast.error(error.message || "Invalid credentials");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -76,21 +77,25 @@ export function LoginForm() {
     try {
       if (!validateUsername(registerData.username)) {
         toast.error("Username must start with 'dbu' followed by 8 digits (e.g., dbu10304058)");
+        setIsLoading(false);
         return;
       }
 
       if (!validatePassword(registerData.password)) {
         toast.error("Password must be at least 8 characters with uppercase, lowercase, digit, and symbol");
+        setIsLoading(false);
         return;
       }
 
       if (registerData.password !== registerData.confirmPassword) {
         toast.error("Passwords do not match");
+        setIsLoading(false);
         return;
       }
 
       if (!registerData.name || !registerData.department || !registerData.year) {
         toast.error("Please fill all required fields");
+        setIsLoading(false);
         return;
       }
 
@@ -106,7 +111,6 @@ export function LoginForm() {
       toast.success("Registration successful");
     } catch (error) {
       toast.error(error.message || "Registration failed");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -344,36 +348,24 @@ export function LoginForm() {
             )}
           </motion.button>
 
-          {/* Toggle between login and register */}
-          <div className="text-center">
+          {/* Forgot Password and Toggle */}
+          <div className="flex items-center justify-between">
+            {!showRegister && (
+              <button
+                type="button"
+                onClick={() => toast.info("Please contact admin for password reset")}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center">
+                <KeyRound className="w-4 h-4 mr-1" />
+                Forgot Password?
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setShowRegister(!showRegister)}
-              className="text-blue-600 hover:text-blue-700 font-medium">
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium ml-auto">
               {showRegister ? "Already have an account? Login" : "Don't have an account? Register"}
             </button>
           </div>
-
-          {/* Demo Credentials */}
-          {!showRegister && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="text-sm">
-                <p className="font-medium text-blue-800 mb-2">Demo Credentials:</p>
-                <div className="space-y-2">
-                  <div className="text-blue-700">
-                    <p className="font-medium">Student:</p>
-                    <span>Username: dbu10304058</span><br />
-                    <span>Password: Student123#</span>
-                  </div>
-                  <div className="text-blue-700 pt-2 border-t border-blue-200">
-                    <p className="font-medium">Admin:</p>
-                    <span>Username: dbu10101030</span><br />
-                    <span>Password: Admin123#</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </motion.form>
       </motion.div>
     </div>

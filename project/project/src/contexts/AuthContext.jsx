@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { apiService } from "../services/api";
+import { supabaseApiService } from "../services/supabaseApi";
 import toast from "react-hot-toast";
 
 const AuthContext = createContext();
@@ -17,44 +17,30 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
     const savedUser = localStorage.getItem("user");
-    
+
     if (savedUser) {
       const userData = JSON.parse(savedUser);
       setUser(userData);
-      // Verify token is still valid
-      if (userData.token) {
-        verifyToken(userData.token);
-      }
     }
-    
+
     setLoading(false);
   }, []);
-
-  const verifyToken = async (token) => {
-    try {
-      await apiService.getProfile();
-    } catch (error) {
-      // Token is invalid, logout user
-      logout();
-    }
-  };
 
   const login = async (username, password) => {
     try {
       setLoading(true);
-      const response = await apiService.login({ username, password });
-      
+      const response = await supabaseApiService.login({ username, password });
+
       const studentUser = {
         ...response.user,
         token: response.token,
-        isAdmin: response.user.role === "admin" || response.user.isAdmin,
+        isAdmin: response.user.role === "admin" || response.user.is_admin,
       };
 
       localStorage.setItem("user", JSON.stringify(studentUser));
       setUser(studentUser);
-      
+
       return studentUser;
     } catch (error) {
       throw error;
@@ -66,8 +52,12 @@ export const AuthProvider = ({ children }) => {
   const adminLogin = async (username, password) => {
     try {
       setLoading(true);
-      const response = await apiService.adminLogin({ username, password });
-      
+      const response = await supabaseApiService.login({ username, password });
+
+      if (!response.user.is_admin) {
+        throw new Error("You do not have admin privileges");
+      }
+
       const adminUser = {
         ...response.user,
         token: response.token,
@@ -76,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("user", JSON.stringify(adminUser));
       setUser(adminUser);
-      
+
       return adminUser;
     } catch (error) {
       throw error;
@@ -88,8 +78,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setLoading(true);
-      const response = await apiService.register(userData);
-      
+      const response = await supabaseApiService.register(userData);
+
       const newUser = {
         ...response.user,
         token: response.token,
@@ -98,7 +88,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("user", JSON.stringify(newUser));
       setUser(newUser);
-      
+
       return newUser;
     } catch (error) {
       throw error;

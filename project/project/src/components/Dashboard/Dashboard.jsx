@@ -1,6 +1,6 @@
 /** @format */
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Users,
 	Vote,
@@ -13,37 +13,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
+import { supabaseApiService } from "../../services/supabaseApi";
 import "../../app.css";
-const stats = [
-	{
-		title: "Active Students",
-		value: "12,547",
-		change: "+12%",
-		icon: Users,
-		color: "bg-blue-500",
-	},
-	{
-		title: "Ongoing Elections",
-		value: "3",
-		change: "2 ending soon",
-		icon: Vote,
-		color: "bg-green-500",
-	},
-	{
-		title: "Active Clubs",
-		value: "47",
-		change: "+5 this month",
-		icon: Award,
-		color: "bg-purple-500",
-	},
-	{
-		title: "Pending Complaints",
-		value: "23",
-		change: "-8 resolved",
-		icon: MessageSquare,
-		color: "bg-orange-500",
-	},
-];
 
 const recentActivities = [
 	{
@@ -85,6 +56,78 @@ const upcomingEvents = [
 
 export function Dashboard() {
 	const { user } = useAuth();
+	const [stats, setStats] = useState([
+		{
+			title: "Active Students",
+			value: "0",
+			change: "Loading...",
+			icon: Users,
+			color: "bg-blue-500",
+		},
+		{
+			title: "Ongoing Elections",
+			value: "0",
+			change: "Loading...",
+			icon: Vote,
+			color: "bg-green-500",
+		},
+		{
+			title: "Active Clubs",
+			value: "0",
+			change: "Loading...",
+			icon: Award,
+			color: "bg-purple-500",
+		},
+		{
+			title: "Pending Complaints",
+			value: "0",
+			change: "Loading...",
+			icon: MessageSquare,
+			color: "bg-orange-500",
+		},
+	]);
+
+	useEffect(() => {
+		loadDashboardStats();
+	}, []);
+
+	const loadDashboardStats = async () => {
+		try {
+			const data = await supabaseApiService.getDashboardStats();
+			setStats([
+				{
+					title: "Active Students",
+					value: data.activeStudents.toString(),
+					change: "Enrolled students",
+					icon: Users,
+					color: "bg-blue-500",
+				},
+				{
+					title: "Ongoing Elections",
+					value: data.ongoingElections.toString(),
+					change: "Active now",
+					icon: Vote,
+					color: "bg-green-500",
+				},
+				{
+					title: "Active Clubs",
+					value: data.activeClubs.toString(),
+					change: "Student clubs",
+					icon: Award,
+					color: "bg-purple-500",
+				},
+				{
+					title: "Pending Complaints",
+					value: data.pendingComplaints.toString(),
+					change: "Awaiting resolution",
+					icon: MessageSquare,
+					color: "bg-orange-500",
+				},
+			]);
+		} catch (error) {
+			console.error('Error loading dashboard stats:', error);
+		}
+	};
 
 	const getGreeting = () => {
 		const hour = new Date().getHours();

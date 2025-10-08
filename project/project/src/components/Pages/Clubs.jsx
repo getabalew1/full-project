@@ -48,7 +48,6 @@ export function Clubs() {
     "Technology",
     "Service",
     "Arts",
-    "Religious",
     "Professional",
   ];
 
