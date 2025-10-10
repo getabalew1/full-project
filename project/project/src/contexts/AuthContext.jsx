@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { supabaseApiService } from "../services/supabaseApi";
+import { apiService } from "../services/api";
 import toast from "react-hot-toast";
 
 const AuthContext = createContext();
@@ -30,12 +30,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       setLoading(true);
-      const response = await supabaseApiService.login({ username, password });
+      const response = await apiService.login({ username, password });
 
       const studentUser = {
         ...response.user,
         token: response.token,
-        isAdmin: response.user.role === "admin" || response.user.is_admin,
+        isAdmin: response.user.role === "admin" || response.user.isAdmin,
       };
 
       localStorage.setItem("user", JSON.stringify(studentUser));
@@ -52,9 +52,9 @@ export const AuthProvider = ({ children }) => {
   const adminLogin = async (username, password) => {
     try {
       setLoading(true);
-      const response = await supabaseApiService.login({ username, password });
+      const response = await apiService.adminLogin({ username, password });
 
-      if (!response.user.is_admin) {
+      if (!response.user.isAdmin && response.user.role !== "admin") {
         throw new Error("You do not have admin privileges");
       }
 
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setLoading(true);
-      const response = await supabaseApiService.register(userData);
+      const response = await apiService.register(userData);
 
       const newUser = {
         ...response.user,

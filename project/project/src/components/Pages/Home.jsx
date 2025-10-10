@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Vote, Users, MessageSquare, Building, ArrowRight } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
-import { supabaseApiService } from "../../services/supabaseApi";
+import { apiService } from "../../services/api";
 import "../../app.css";
 
 export const Home = () => {
@@ -28,24 +28,14 @@ export const Home = () => {
 
 	const loadData = async () => {
 		try {
-			const [posts, dashboardStats] = await Promise.all([
-				supabaseApiService.getPosts({ limit: 3, type: 'Announcement' }),
-				supabaseApiService.getDashboardStats()
-			]);
+			const posts = await apiService.getPosts({ limit: 3, type: 'Announcement' });
 
 			setAnnouncements(posts.map(post => ({
-				id: post.id,
+				id: post._id,
 				title: post.title,
 				date: post.date,
 				urgent: post.important
 			})));
-
-			setStats({
-				activeStudents: dashboardStats.activeStudents.toLocaleString(),
-				clubs: dashboardStats.activeClubs.toString(),
-				serviceBranches: "10",
-				satisfactionRate: "95%"
-			});
 		} catch (error) {
 			console.error('Error loading data:', error);
 		}

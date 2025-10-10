@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
-import { supabaseApiService } from "../../services/supabaseApi";
+import { apiService } from "../../services/api";
 import "../../app.css";
 
 const recentActivities = [
@@ -93,32 +93,36 @@ export function Dashboard() {
 
 	const loadDashboardStats = async () => {
 		try {
-			const data = await supabaseApiService.getDashboardStats();
+			const usersStats = await apiService.getUserStats();
+			const electionsStats = await apiService.getElectionStats();
+			const clubsStats = await apiService.getClubStats();
+			const complaintsStats = await apiService.getComplaintStats();
+
 			setStats([
 				{
 					title: "Active Students",
-					value: data.activeStudents.toString(),
+					value: (usersStats?.total || 0).toString(),
 					change: "Enrolled students",
 					icon: Users,
 					color: "bg-blue-500",
 				},
 				{
 					title: "Ongoing Elections",
-					value: data.ongoingElections.toString(),
+					value: (electionsStats?.active || 0).toString(),
 					change: "Active now",
 					icon: Vote,
 					color: "bg-green-500",
 				},
 				{
 					title: "Active Clubs",
-					value: data.activeClubs.toString(),
+					value: (clubsStats?.total || 0).toString(),
 					change: "Student clubs",
 					icon: Award,
 					color: "bg-purple-500",
 				},
 				{
 					title: "Pending Complaints",
-					value: data.pendingComplaints.toString(),
+					value: (complaintsStats?.pending || 0).toString(),
 					change: "Awaiting resolution",
 					icon: MessageSquare,
 					color: "bg-orange-500",
